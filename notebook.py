@@ -1,19 +1,62 @@
 # %%
 import pandas as pd
 import numpy as np
+import requests
+import os
+import shutil
+import string
+
+# %%
+google_cloud_url = "https://storage.googleapis.com/watcher-csv-exporter/"
+session_filename_template = string.Template("polkadot_nominators_session_$id.csv")
+era_filename_template = string.Template("polkadot_validators_era_$id.csv")
 
 # %%
 """
-Setting N (Number of validators in era) fixed for now
+Loading of data starting from era number 165 and session 1031
 """
 
 # %%
-initial_N = 297
+def download_file(url, destination):
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    with open(destination, 'wb') as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                file.write(chunk)
 
-# %%
-"""
-Loading of data from era number 165 and session 1031
-"""
+def download_batch(starting_era=165, starting_session=1031, destinationFolder="data/", number_of_eras_to_download=100):
+    if os.path.exists(destinationFolder):
+         shutil.rmtree(destinationFolder)
+         
+    os.makedirs(destinationFolder, exist_ok=True)
+    era_id = starting_era
+    session_id = starting_session
+    total_eras_downloaded = 0
+
+    while total_eras_downloaded < number_of_eras_to_download:
+        era_filename = era_filename_template.substitute({'id': era_id})
+
+        try:
+            download_file(
+                google_cloud_url + era_filename,
+                destinationFolder + era_filename
+            )
+        except Exception as e:
+            era_id += 1
+            session_id += 6
+            continue
+        
+        session_filename = session_filename_template.substitute({'id': session_id})
+        download_file(
+            google_cloud_url + session_filename,
+            destinationFolder + session_filename
+        )
+
+        total_eras_downloaded += 1
+        era_id += 1
+        session_id += 6
+
+download_batch()
 
 # %%
 nominators = pd.read_csv("data/polkadot_nominators_session_1031.csv")
@@ -23,6 +66,7 @@ validators = pd.read_csv("data/polkadot_validators_era_165.csv")
 nominators
 
 # %%
+number_of_validators = len(validators)
 validators
 
 # %%
