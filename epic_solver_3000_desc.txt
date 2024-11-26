@@ -1,0 +1,29 @@
+1. dzielimy nominatorów na biedaków i bogaczy (jakaś metoda statystyczna żeby wyznaczyć miejsce podziału)
+- sortujemy liste nominatorow od najbogatszego
+
+2. kasa każdego nominatora jest przypisana po równo do każdego walidatora, którego on wskazał
+- w binary matrix dzielimy wiersz przez sume w wierszu (liczbe wskazanych walidatorow przez nominatora) a nastepnie mnozymy row przez amount nominatora
+
+3. wybieramy 297 walidatorów maksymalizując total amount (albo genetyk na ślepo i w późniejszym etapie dowiadujemy się czy to był dobry wybór)
+- wybieramy 297 kolumn z najwieksza suma amounta
+
+4. przechodzimy po kolei po nominatorach sortując po liczbie wskazanych walidatorów i po amount (najpierw ci którzy wskazali najmniej walidatorów, w przypadku remisu najpierw bogatszy) 
+i rozdzielamy kasę tak, by minimalizować różnice między walidatorami (biedak przypisuje kasę tylko do jednego walidatora!)
+- mamy strukture danych, gdzie index to nazwa nominatora, kolumny to wybrani 297 validatorzy, a komorki to wskazanie validatora przez nominatora (binary)
+- rozdzielamy dane na biedakow i na bogaczy
+- sortujemy po sumie w row (od najmniejszej) i po amount (od najwiekszego)
+- TYLKO BIEDACY
+- przypisujemy amount danego nominatora do jednego z wskazanych przez niego validatorow, wybieramy najbiedniejszego z wskazanych validatorow i jemu przypisujemy caly amount danego nominatora
+- BOGACZE
+- przechodzimy po kolei po nominatorach i rozdzielamy ich amount miedzy wskazanych validatorw tak, by minimalizowac variance (sumujemy amount u validatorow + amount nominatora, dzielimy przez liczbe wskazanych validatorow, otrzymana wartosc to docelowy amount kazdego validatora, od tej wartosci odejmujemy aktualny amount validatora i ta roznice mu przypisujemy)
+
+5. po przypisaniu każdemu nominatorowi walidatora przechodzimy jeszcze raz, tym razem od najbiedniejszego do najbogatszego i sprawdzamy na bieżąco, czy możemy dokonać zmiany w przypisaniu
+żeby wyrównać kasę wśród walidatorów.
+- sortujemy nominatorow od najbiedniejszego i sprawdzamy po kolei czy mozemy mu przypisac innego validatora, zeby wyrownac rozklad miedzy validatorami (biezemy wskazanych przez niego validatorow, znajdujemy najbiedniejszego z nich i sprawdzamy czy jest biedniejszy niz obecnie wskazany odjac amount nominatora, jesli tak to zmieniamy przypisanie na tego najbiedniejszego)
+
+6. krok 5 możemy powtarzać dopóki jest zauważalna poprawa (stopping criterion)
+- powtarzamy krok 5 tak dlugo jak variance miedzy iteracjami poprawia sie przynajmniej o 1%
+
+7. takie rozwiązanie oceniamy w fitness function
+
+8. genetyk zmienia wybrane kolumny 
